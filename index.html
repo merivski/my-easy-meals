@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>My Easy Meals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF7EF;
+    --paper-2:#F3ECDE;
+    --ink:#2A1B26;
+    --ink-soft:#6B5A63;
+    --line:#E4D9C6;
+    --basil:#3E7D4E;
+    --basil-deep:#2F6A40;
+    --tomato:#D2553C;
+    --card-shadow:0 18px 40px -18px rgba(42,27,38,.45);
+    --r:26px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:"Instrument Sans",system-ui,sans-serif;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #FFFDF7 0%, var(--paper) 55%, var(--paper-2) 100%);
+    color:var(--ink);
+    display:flex;justify-content:center;
+    min-height:100dvh;
+    overflow:hidden;
+  }
+  .app{
+    width:100%;max-width:440px;height:100dvh;
+    display:flex;flex-direction:column;
+    padding:0 16px;position:relative;
+  }
+
+  /* ---------- header ---------- */
+  header{padding:20px 2px 12px;flex:0 0 auto;position:relative}
+  .brand{display:flex;align-items:baseline;gap:9px;padding-right:78px}
+  .brand h1{
+    font-family:"Bricolage Grotesque",sans-serif;
+    font-weight:800;font-size:27px;letter-spacing:-.02em;
+    margin:0;line-height:1;
+  }
+  .brand .dot{color:var(--basil)}
+  .tagline{font-size:13px;color:var(--ink-soft);margin:7px 2px 0;line-height:1.4}
+  .count-line{font-size:12px;font-weight:600;color:var(--basil-deep);margin:7px 2px 0}
+
+  /* ---------- filter chips ---------- */
+  .chips{
+    display:flex;gap:7px;overflow-x:auto;padding:14px 2px 4px;
+    scrollbar-width:none;-ms-overflow-style:none;flex:0 0 auto;
+  }
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;border:1.5px solid var(--line);background:#fff;
+    color:var(--ink);font-family:inherit;font-size:13px;font-weight:600;
+    padding:7px 13px;border-radius:999px;cursor:pointer;white-space:nowrap;
+    transition:transform .12s ease, background .15s, border-color .15s, color .15s;
+  }
+  .chip:hover{transform:translateY(-1px)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+  /* ---------- deck ---------- */
+  .deck-wrap{flex:1 1 auto;position:relative;display:flex;align-items:center;justify-content:center;margin:8px 0}
+  .deck{position:relative;width:100%;height:100%;max-height:560px}
+
+  .card{
+    position:absolute;inset:0;border-radius:var(--r);
+    background:#fff;box-shadow:var(--card-shadow);
+    border:1px solid rgba(42,27,38,.06);
+    overflow:hidden;display:flex;flex-direction:column;
+    transform-origin:center bottom;
+    will-change:transform;touch-action:none;cursor:grab;
+    user-select:none;
+  }
+  .card:active{cursor:grabbing}
+  .card .hero{
+    position:relative;height:48%;flex:0 0 48%;
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+  }
+  .card .hero .glyph{font-size:108px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.18));transform:rotate(-6deg)}
+  .card .hero .cat-tag{
+    position:absolute;top:14px;left:14px;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(4px);
+    font-size:11.5px;font-weight:700;letter-spacing:.02em;
+    padding:5px 11px;border-radius:999px;color:var(--ink);
+  }
+  .card .hero .keeps{
+    position:absolute;bottom:14px;right:14px;
+    background:rgba(42,27,38,.78);color:#fff;
+    font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;
+    display:flex;align-items:center;gap:5px;
+  }
+  .card .body{padding:18px 20px 16px;flex:1 1 auto;display:flex;flex-direction:column}
+  .card .body h2{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+    font-size:22px;line-height:1.12;letter-spacing:-.015em;margin:0 0 10px;
+  }
+  .meta{display:flex;gap:14px;color:var(--ink-soft);font-size:13px;font-weight:600;margin-bottom:12px}
+  .meta span{display:flex;align-items:center;gap:5px}
+  .taglist{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+  .taglist .t{
+    font-size:11.5px;font-weight:600;color:var(--basil-deep);
+    background:rgba(62,125,78,.1);padding:4px 10px;border-radius:999px;
+  }
+  .hint{font-size:12px;color:var(--ink-soft);margin-top:13px;display:flex;align-items:center;gap:6px;opacity:.85}
+
+  /* swipe stamps */
+  .stamp{
+    position:absolute;top:26px;font-family:"Bricolage Grotesque",sans-serif;
+    font-weight:800;font-size:30px;letter-spacing:.04em;padding:6px 16px;
+    border:4px solid;border-radius:14px;opacity:0;pointer-events:none;
+    transition:opacity .05s;text-transform:uppercase;
+  }
+  .stamp.like{right:22px;color:var(--basil);border-color:var(--basil);transform:rotate(14deg)}
+  .stamp.nope{left:22px;color:var(--tomato);border-color:var(--tomato);transform:rotate(-14deg)}
+
+  /* ---------- action buttons ---------- */
+  .actions{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 0 calc(14px + env(safe-area-inset-bottom))}
+  .act{
+    border:none;cursor:pointer;border-radius:50%;background:#fff;
+    box-shadow:0 8px 20px -8px rgba(42,27,38,.4);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .14s ease, box-shadow .14s;
+  }
+  .act:hover{transform:translateY(-3px)}
+  .act:active{transform:scale(.92)}
+  .act svg{width:26px;height:26px}
+  .act.pass{width:58px;height:58px;color:var(--tomato)}
+  .act.like{width:70px;height:70px;color:#fff;background:var(--basil)}
+  .act.like svg{width:32px;height:32px}
+  .act.undo{width:46px;height:46px;color:var(--ink-soft)}
+  .act.undo svg{width:20px;height:20px}
+  .act:disabled{opacity:.35;cursor:default;transform:none}
+
+  /* ---------- saved tab button ---------- */
+  .saved-fab{
+    position:absolute;top:22px;right:0;background:none;border:none;cursor:pointer;
+    color:var(--ink);display:flex;align-items:center;gap:5px;font-family:inherit;
+    font-weight:700;font-size:13px;padding:6px;
+  }
+  .saved-fab .badge{
+    background:var(--tomato);color:#fff;font-size:11px;min-width:18px;height:18px;
+    border-radius:999px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;
+  }
+
+  /* ---------- empty state ---------- */
+  .empty{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:30px;
+    border-radius:var(--r);border:2px dashed var(--line);background:rgba(255,255,255,.5);
+  }
+  .empty.show{display:flex}
+  .empty .em-glyph{font-size:60px;margin-bottom:14px}
+  .empty h3{font-family:"Bricolage Grotesque",sans-serif;font-size:21px;margin:0 0 6px}
+  .empty p{color:var(--ink-soft);font-size:14px;margin:0 0 20px;max-width:240px;line-height:1.45}
+
+  .btn{
+    font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;
+    border:none;border-radius:999px;padding:12px 24px;background:var(--ink);color:var(--paper);
+    transition:transform .12s;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+
+  /* ---------- modal (recipe + list) ---------- */
+  .scrim{
+    position:fixed;inset:0;background:rgba(33,20,28,.5);backdrop-filter:blur(3px);
+    opacity:0;pointer-events:none;transition:opacity .25s;z-index:40;
+  }
+  .scrim.open{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);
+    width:100%;max-width:440px;max-height:92dvh;background:var(--paper);
+    border-radius:26px 26px 0 0;z-index:50;transition:transform .32s cubic-bezier(.22,1,.36,1);
+    display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -10px 50px -10px rgba(0,0,0,.4);
+  }
+  .sheet.open{transform:translate(-50%,0)}
+  .sheet .grab{width:42px;height:5px;border-radius:999px;background:var(--line);margin:10px auto 0;flex:0 0 auto}
+  .sheet-head{position:relative;padding:18px 22px 14px;flex:0 0 auto}
+  .sheet-head .s-cat{font-size:11.5px;font-weight:700;color:#fff;padding:5px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:6px}
+  .sheet-head h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:25px;line-height:1.1;letter-spacing:-.02em;margin:11px 0 12px}
+  .sheet-head .s-meta{display:flex;gap:16px;color:var(--ink-soft);font-size:13.5px;font-weight:600;flex-wrap:wrap}
+  .sheet-head .s-meta span{display:flex;align-items:center;gap:6px}
+  .x{position:absolute;top:14px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:#fff;
+     box-shadow:0 4px 12px -4px rgba(0,0,0,.3);cursor:pointer;font-size:18px;color:var(--ink);display:flex;align-items:center;justify-content:center}
+  .sheet-body{overflow-y:auto;padding:4px 22px 26px;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+  .sec-label{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;
+     margin:20px 0 11px;display:flex;align-items:center;gap:8px}
+  .sec-label::after{content:"";flex:1;height:1.5px;background:var(--line)}
+  ul.ing{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  ul.ing li{display:flex;align-items:flex-start;gap:11px;padding:9px 4px;border-bottom:1px solid var(--line);
+     font-size:14.5px;line-height:1.35;cursor:pointer}
+  ul.ing li:last-child{border-bottom:none}
+  ul.ing .box{flex:0 0 auto;width:21px;height:21px;border-radius:6px;border:2px solid var(--line);margin-top:1px;
+     display:flex;align-items:center;justify-content:center;transition:.15s}
+  ul.ing li.done .box{background:var(--basil);border-color:var(--basil)}
+  ul.ing li.done .box svg{opacity:1}
+  ul.ing .box svg{width:13px;height:13px;color:#fff;opacity:0;transition:.15s}
+  ul.ing li.done span{color:var(--ink-soft);text-decoration:line-through}
+  ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:12px}
+  ol.steps li{counter-increment:s;display:flex;gap:13px;font-size:14.5px;line-height:1.45}
+  ol.steps li::before{content:counter(s);flex:0 0 auto;width:27px;height:27px;border-radius:50%;
+     background:var(--ink);color:var(--paper);font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+     font-size:14px;display:flex;align-items:center;justify-content:center}
+  .note{margin-top:22px;background:rgba(62,125,78,.09);border-radius:16px;padding:14px 16px;
+     font-size:13.5px;line-height:1.5;color:var(--basil-deep);display:flex;gap:10px;align-items:flex-start}
+  .note b{color:var(--basil-deep)}
+  .stay-tag{margin:14px 0 0;font-size:12px;color:var(--ink-soft);text-align:center}
+
+  /* list view */
+  .list-empty{text-align:center;padding:50px 20px;color:var(--ink-soft)}
+  .list-empty .le-g{font-size:50px;margin-bottom:12px}
+  .saved-list{display:flex;flex-direction:column;gap:10px}
+  .srow{display:flex;align-items:center;gap:13px;background:#fff;border-radius:16px;padding:11px 14px;
+     border:1px solid var(--line);cursor:pointer;transition:transform .12s}
+  .srow:hover{transform:translateX(3px)}
+  .srow .sg{font-size:30px;flex:0 0 auto}
+  .srow .si{flex:1 1 auto;min-width:0}
+  .srow .si h4{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:15px;margin:0 0 2px;
+     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .srow .si p{margin:0;font-size:12px;color:var(--ink-soft)}
+  .srow .rm{flex:0 0 auto;border:none;background:none;cursor:pointer;color:var(--ink-soft);padding:6px;font-size:18px}
+  .srow .rm:hover{color:var(--tomato)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important}
+  }
+  @media (max-height:680px){
+    .card .hero .glyph{font-size:84px}
+    .deck{max-height:480px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>My Easy Meals<span class="dot">.</span></h1>
+    </div>
+    <p class="tagline">Sağa kaydır, eşleş, tarifi al. Hepsi hızlı, doyurucu ve Cenova marketlerinden.</p>
+    <div class="count-line" id="counter"></div>
+    <button class="saved-fab" id="openSaved" aria-label="Mutfak listem">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      Listem<span class="badge" id="savedBadge" style="display:none">0</span>
+    </button>
+  </header>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="deck-wrap">
+    <div class="deck" id="deck"></div>
+    <div class="empty" id="empty">
+      <div class="em-glyph">🍽️</div>
+      <h3>Hepsini gördün!</h3>
+      <p>Bu seçimdeki tüm tarifleri elemiş oldun. Desteyi karıştırıp baştan bakabilirsin.</p>
+      <button class="btn" id="reshuffle">Desteyi karıştır</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="act undo" id="undoBtn" aria-label="Geri al" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 9"/></svg>
+    </button>
+    <button class="act pass" id="passBtn" aria-label="Geç">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <button class="act like" id="likeBtn" aria-label="Eşleş">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.9-10-9.3C.4 8.7 2 5 5.4 5c2 0 3.4 1.2 4.1 2.4C10.2 6.2 11.6 5 13.6 5 17 5 18.6 8.7 17 11.7 14.5 16.1 12 21 12 21z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- recipe / list sheet -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="grab"></div>
+  <div id="sheetContent"></div>
+</div>
+
+<script>
+const RECIPES = [{"id": 1, "name": "Ton Balıklı Tek Tencere Makarna", "emoji": "🍝", "cat": "pasta", "time": "20 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["tek tencere", "protein"], "ing": ["320 g penne", "2 kutu ton balığı (tonno in scatola)", "1 kutu doğranmış domates (pomodori a pezzi)", "1 soğan", "2 diş sarımsak", "2 yk zeytinyağı", "tuz, karabiber, pul biber"], "steps": ["Soğan ve sarımsağı zeytinyağında pembeleştir.", "Domatesi ekle, 5 dk kaynat, baharatları at.", "Süzülmüş ton balığını ekle, karıştır.", "Ayrı kaynattığın makarnayı sosla harmanla, biraz makarna suyu ekle."], "note": "Buzdolabında 3 gün; yerken üstüne biraz zeytinyağı."}, {"id": 2, "name": "Limonlu Brokolili Makarna", "emoji": "🥦", "cat": "pasta", "time": "20 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["sebzeli", "hafif"], "ing": ["320 g spaghetti", "1 baş brokoli (broccoli)", "2 diş sarımsak", "1 limon kabuğu + suyu", "3 yk zeytinyağı", "rendelenmiş parmigiano", "tuz, pul biber"], "steps": ["Makarnanın son 4 dakikasında brokoliyi aynı tencereye at.", "Tavada sarımsağı zeytinyağında ısıt.", "Süzülen makarna ve brokoliyi tavaya al.", "Limon kabuğu, suyu ve parmigiano ekleyip karıştır."], "note": "Soğukken de güzel, ertesi güne salata gibi."}, {"id": 3, "name": "Pesto'lu Cavatappi", "emoji": "🌿", "cat": "pasta", "time": "15 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["hızlı", "5 malzeme"], "ing": ["320 g cavatappi veya fusilli", "1 kavanoz pesto (pesto genovese)", "1 avuç kiraz domates (pomodorini)", "rendelenmiş parmigiano", "zeytinyağı"], "steps": ["Makarnayı haşla, yarım bardak suyunu ayır.", "Süzülen makarnaya pestoyu ve birkaç kaşık makarna suyunu ekle.", "İkiye böldüğün domatesleri karıştır.", "Parmigiano serp."], "note": "Cenova klasiği. Pestoyu soğuk ekle ki yeşil kalsın."}, {"id": 4, "name": "Mercimekli Bolonez (etsiz)", "emoji": "🍅", "cat": "pasta", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "etsiz"], "ing": ["320 g spaghetti", "150 g kırmızı mercimek (lenticchie rosse)", "1 kutu passata", "1 soğan, 1 havuç, 1 sap kereviz", "2 diş sarımsak", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Doğranmış soğan, havuç, kereviz, sarımsağı zeytinyağında 5 dk soteleyin.", "Passata ve mercimeği ekle, 1 bardak su koy.", "Kısık ateşte 18-20 dk pişir, mercimek dağılsın.", "Haşlanmış makarnayla servis et."], "note": "Sos buzdolabında 4 gün, dondurulabilir de."}, {"id": 5, "name": "Acılı Domatesli Makarna (Arrabbiata)", "emoji": "🌶️", "cat": "pasta", "time": "20 dk", "serv": "3-4", "keeps": "4 gün", "tags": ["vegan", "acılı"], "ing": ["320 g penne", "1 kutu pelati (bütün domates)", "3 diş sarımsak", "1-2 kuru acı biber (peperoncino)", "4 yk zeytinyağı", "taze maydanoz", "tuz"], "steps": ["Sarımsak ve acıyı zeytinyağında kokusu çıkana kadar ısıt.", "Domatesleri ezerek ekle, 12-15 dk pişir.", "Makarnayı haşlayıp sosa al.", "Maydanozla servis."], "note": "Sos tek başına 4 gün dayanır."}, {"id": 6, "name": "Ispanaklı Ricotta Makarna", "emoji": "🧀", "cat": "pasta", "time": "18 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["hızlı", "kremamsı"], "ing": ["320 g rigatoni", "200 g taze ıspanak (spinaci)", "150 g ricotta", "2 diş sarımsak", "rendelenmiş parmigiano", "zeytinyağı", "muskat, tuz, karabiber"], "steps": ["Sarımsağı yağda ısıt, ıspanağı ekle, sönene kadar çevir.", "Ricottayı ve yarım bardak makarna suyunu ekle, kremamsı sos yap.", "Süzülen makarnayı karıştır, muskat ve parmigiano ekle."], "note": "3 gün; ısıtırken bir kaşık su ekle."}, {"id": 7, "name": "Sebzeli Çin Usulü Pirinç (fried rice)", "emoji": "🍚", "cat": "pasta", "time": "20 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["artık değerlendirme", "tek tava"], "ing": ["3 bardak pişmiş soğumuş pirinç", "2 yumurta", "1 havuç", "1 bardak bezelye (piselli)", "2 yk soya sosu", "2 diş sarımsak", "2 yk yağ", "yeşil soğan"], "steps": ["Yumurtaları tavada çırpıp pişir, kenara al.", "Sarımsak ve sebzeleri yağda 4-5 dk soteleyin.", "Pirinci ekle, yüksek ateşte karıştır.", "Soya sosu ve yumurtayı ekle, yeşil soğanla bitir."], "note": "Dünkü pirinci değerlendirmek için ideal."}, {"id": 8, "name": "Kıymalı Fırın Makarnası", "emoji": "🧀", "cat": "pasta", "time": "35 dk", "serv": "4-5", "keeps": "4 gün", "tags": ["doyurucu", "fırın"], "ing": ["400 g penne", "300 g kıyma (carne macinata)", "1 kutu passata", "1 soğan", "200 g rendelenmiş mozzarella", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Soğan ve kıymayı soteleyin, passatayı ekle 10 dk pişir.", "Yarı haşlanmış makarnayı sosla karıştır.", "Fırın kabına al, üstüne mozzarella.", "200°C fırında 15 dk, üstü kızarana kadar."], "note": "En sevilen artık yemek; 4 gün dolapta."}, {"id": 9, "name": "Karnabaharlı Sarımsaklı Makarna", "emoji": "🤍", "cat": "pasta", "time": "22 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["sebzeli", "ucuz"], "ing": ["320 g orecchiette", "yarım karnabahar (cavolfiore)", "3 diş sarımsak", "4 yk zeytinyağı", "1 avuç galeta unu (pangrattato)", "pul biber, parmigiano"], "steps": ["Karnabaharı küçük parçala, makarnayla birlikte haşla.", "Sarımsağı yağda ısıt, galeta ununu çıtırlat.", "Süzülen makarna ve karnabaharı tavaya al, karıştır.", "Çıtır galeta ve parmigiano ile servis."], "note": "Çıtır galetayı ayrı sakla, yerken üzerine serp."}, {"id": 10, "name": "Yoğurtlu Naneli Makarna", "emoji": "🌿", "cat": "pasta", "time": "15 dk", "serv": "3", "keeps": "2 gün", "tags": ["Türk usulü", "hızlı"], "ing": ["300 g penne", "1 bardak süzme yoğurt (yogurt greco)", "2 diş sarımsak", "2 yk tereyağı", "1 yk pul biber", "kuru nane, tuz"], "steps": ["Yoğurda ezilmiş sarımsak ve tuz karıştır.", "Haşlanan makarnayı tabağa al, yoğurdu üstüne koy.", "Tereyağında pul biber ve naneyi kızdır, üzerine gezdir."], "note": "Yoğurtlu olduğu için en taze 1-2 günde; sosu sıcak dökme."}, {"id": 11, "name": "Köri Soslu Nohutlu Pilav", "emoji": "🍛", "cat": "pasta", "time": "25 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["2 bardak basmati pirinç", "1 kutu nohut (ceci)", "1 soğan", "1 yk köri", "1 kutu hindistan cevizi sütü (latte di cocco)", "zeytinyağı", "tuz"], "steps": ["Soğanı yağda kavur, köriyi ekle kokusu çıksın.", "Yıkanmış pirinci ekle, 1 dk çevir.", "Nohut, hindistan cevizi sütü ve 2 bardak su ekle.", "Kısık ateşte 15 dk, demlenmeye bırak."], "note": "4 gün; mikrodalgada bir kaşık suyla ısıt."}, {"id": 12, "name": "Zeytinyağlı Bezelyeli Pilav", "emoji": "🟢", "cat": "pasta", "time": "20 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "klasik"], "ing": ["2 bardak pirinç", "1.5 bardak bezelye (piselli)", "1 soğan", "3 yk zeytinyağı", "1 yk şeker", "tuz, dereotu"], "steps": ["Soğanı zeytinyağında soteleyin.", "Bezelye ve pirinci ekle, kısa çevir.", "2.5 bardak sıcak su, tuz, şeker ekle.", "15 dk pişir, dereotuyla demlendir."], "note": "Soğuk da yenir, 4 gün dayanır."}, {"id": 13, "name": "Klasik Kırmızı Mercimek Çorbası", "emoji": "🍲", "cat": "legume", "time": "30 dk", "serv": "5", "keeps": "4 gün", "tags": ["Türk usulü", "doyurucu"], "ing": ["1.5 bardak kırmızı mercimek (lenticchie rosse)", "1 soğan", "1 havuç", "1 patates", "2 yk un", "1 yk salça (concentrato di pomodoro)", "zeytinyağı", "kimyon, tuz"], "steps": ["Sebzeleri ve mercimeği 6 bardak suyla 20 dk haşla.", "Blenderdan geçir, pürüzsüz olsun.", "Yağda unu ve salçayı kavur, çorbaya ekle.", "Kimyon ve tuzla 5 dk daha pişir."], "note": "Klasik batch yemek; 4 gün ve dondurulabilir."}, {"id": 14, "name": "Fırında Baharatlı Nohut", "emoji": "🧆", "cat": "legume", "time": "30 dk", "serv": "3-4", "keeps": "4 gün", "tags": ["vegan", "atıştırmalık"], "ing": ["2 kutu nohut (ceci)", "2 yk zeytinyağı", "1 ts kimyon", "1 ts tatlı toz biber (paprika)", "1 ts sarımsak tozu", "tuz"], "steps": ["Nohutları süzüp kurula.", "Yağ ve baharatlarla harmanla.", "200°C fırında 25 dk, ara ara karıştır.", "Salata, kase veya atıştırmalık olarak."], "note": "Çıtır kalsın diye kuru kapta sakla, 4 gün."}, {"id": 15, "name": "Barbunya Pilaki", "emoji": "🫘", "cat": "legume", "time": "35 dk", "serv": "5", "keeps": "5 gün", "tags": ["vegan", "zeytinyağlı"], "ing": ["2 kutu barbunya (fagioli borlotti)", "1 soğan", "1 havuç", "1 patates", "2 diş sarımsak", "1 yk salça", "zeytinyağı", "şeker, tuz, maydanoz"], "steps": ["Soğan, havuç, patatesi küp doğra, yağda soteleyin.", "Salça, süzülmüş barbunya, 1.5 bardak su ekle.", "20 dk pişir, şeker ve tuzu ekle.", "Soğuyunca maydanozla servis."], "note": "Soğuk yenir, 5 gün dayanır; en lezzetli ertesi gün."}, {"id": 16, "name": "Hindistan Cevizli Mercimek Köri (dahl)", "emoji": "🍛", "cat": "legume", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1.5 bardak kırmızı mercimek", "1 kutu hindistan cevizi sütü", "1 soğan", "2 diş sarımsak", "1 yk köri", "1 ts zerdeçal", "zeytinyağı, tuz"], "steps": ["Soğan ve sarımsağı yağda kavur, baharatları ekle.", "Mercimek, hindistan cevizi sütü ve 2 bardak su ekle.", "20 dk kısık ateşte, mercimek dağılsın.", "Pirinç veya ekmekle servis."], "note": "Donduruluyor; 4 gün dolapta."}, {"id": 17, "name": "Nohut Salatası (Cenova usulü)", "emoji": "🥗", "cat": "legume", "time": "10 dk", "serv": "3", "keeps": "3 gün", "tags": ["vegan", "hızlı"], "ing": ["2 kutu nohut", "1 kırmızı soğan", "1 avuç kiraz domates", "yarım salatalık", "zeytinyağı, limon", "maydanoz, tuz, karabiber"], "steps": ["Tüm malzemeleri doğra.", "Süzülmüş nohutla karıştır.", "Zeytinyağı, limon, tuz ekle.", "Yarım saat dinlendir."], "note": "Öğle yemeği için ideal, 3 gün dolapta."}, {"id": 18, "name": "Toskana Fasulye Çorbası", "emoji": "🥣", "cat": "legume", "time": "30 dk", "serv": "5", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["2 kutu beyaz fasulye (cannellini)", "1 kutu doğranmış domates", "1 soğan, 1 havuç, 1 kereviz", "2 diş sarımsak", "biberiye (rosmarino)", "zeytinyağı, tuz"], "steps": ["Sebzeleri yağda 6-7 dk soteleyin.", "Domates, fasulye ve 3 bardak su ekle.", "Yarısını blenderdan geçirip geri koy (kıvam için).", "Biberiye ve tuzla 10 dk pişir."], "note": "Üstüne kızarmış ekmek; 4 gün."}, {"id": 19, "name": "Humus (ev yapımı)", "emoji": "🧆", "cat": "legume", "time": "10 dk", "serv": "4", "keeps": "5 gün", "tags": ["vegan", "kahvaltı"], "ing": ["1 kutu nohut", "2 yk tahin", "1 limon suyu", "1 diş sarımsak", "3 yk zeytinyağı", "kimyon, tuz", "biraz buzlu su"], "steps": ["Tüm malzemeleri blendera koy.", "Pürüzsüz olana kadar çek, buzlu suyla aç.", "Üstüne zeytinyağı ve kimyon.", "Ekmek veya sebzeyle."], "note": "5 gün dayanır; ekşi maya ekmekle harika."}, {"id": 20, "name": "Mercimek Köftesi", "emoji": "🟤", "cat": "legume", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "Türk usulü"], "ing": ["1 bardak kırmızı mercimek", "yarım bardak ince bulgur", "1 soğan", "1 yk salça", "zeytinyağı", "yeşil soğan, maydanoz, kimyon"], "steps": ["Mercimeği 2 bardak suyla pişir, üstüne bulguru ekle, demlendir.", "Soğanı yağda salçayla kavur, harca ekle.", "Yeşillik ve baharatları karıştır, köfte şekli ver.", "Marul yaprağıyla servis."], "note": "Soğuk yenir, 3 gün buzdolabında."}, {"id": 21, "name": "Kremalı Beyaz Fasulye Sote", "emoji": "🤍", "cat": "legume", "time": "15 dk", "serv": "3", "keeps": "4 gün", "tags": ["vegan", "hızlı"], "ing": ["2 kutu cannellini fasulye", "2 avuç ıspanak", "2 diş sarımsak", "1 kutu doğranmış domates", "zeytinyağı", "pul biber, tuz"], "steps": ["Sarımsağı yağda ısıt.", "Domatesi ekle 5 dk pişir.", "Fasulye ve ıspanağı ekle, 5 dk.", "Pul biber ve tuzla servis."], "note": "Tek başına ya da ekmekle; 4 gün."}, {"id": 22, "name": "Nohutlu Ispanak Yemeği", "emoji": "🥬", "cat": "legume", "time": "20 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "zeytinyağlı"], "ing": ["1 kutu nohut", "300 g ıspanak", "1 soğan", "1 kutu doğranmış domates", "2 diş sarımsak", "zeytinyağı", "kimyon, tuz"], "steps": ["Soğan ve sarımsağı soteleyin.", "Domates ve nohutu ekle, 8 dk pişir.", "Ispanağı ekle, sönene kadar çevir.", "Kimyon ve tuzla bitir."], "note": "Yanına yoğurt; 4 gün dayanır."}, {"id": 23, "name": "Bulgur Pilavlı Mercimek (mücver tarzı kase)", "emoji": "🍛", "cat": "legume", "time": "25 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1 bardak iri bulgur", "1 bardak yeşil mercimek (lenticchie)", "1 soğan", "1 yk salça", "zeytinyağı", "tuz, karabiber"], "steps": ["Mercimeği yarı yumuşayana kadar haşla, süz.", "Soğanı salçayla kavur, bulguru ekle.", "Mercimek ve 2 bardak sıcak su koy.", "15 dk pişir, demlendir."], "note": "Klasik mercimekli bulgur; 4 gün."}, {"id": 24, "name": "Menemen", "emoji": "🍳", "cat": "egg", "time": "15 dk", "serv": "2-3", "keeps": "1 gün", "tags": ["Türk usulü", "kahvaltı"], "ing": ["4 yumurta", "2 yeşil sivri biber (peperone)", "3 domates", "2 yk zeytinyağı", "tuz, pul biber"], "steps": ["Biberleri yağda soteleyin.", "Rendelenmiş domatesi ekle, suyunu çektir.", "Yumurtaları kır, yarı katı olana kadar karıştır.", "Pul biberle servis."], "note": "En tazesi anında; ertesi gün de ısıtılır."}, {"id": 25, "name": "Fırın Sebzeli Frittata", "emoji": "🧀", "cat": "egg", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "fırın"], "ing": ["6 yumurta", "1 kabak (zucchina)", "1 patates", "1 soğan", "50 g parmigiano", "zeytinyağı", "tuz, karabiber"], "steps": ["Sebzeleri ince doğra, tavada yumuşat.", "Çırpılmış yumurta ve peyniri ekle.", "Fırın kabına dök.", "180°C fırında 20 dk."], "note": "Soğuk dilimlenir, piknik ve öğle için; 4 gün."}, {"id": 26, "name": "Shakshuka", "emoji": "🍅", "cat": "egg", "time": "20 dk", "serv": "3", "keeps": "2 gün", "tags": ["protein", "tek tava"], "ing": ["4 yumurta", "1 kutu doğranmış domates", "1 soğan", "1 kırmızı biber", "2 diş sarımsak", "kimyon, tatlı toz biber", "zeytinyağı, tuz"], "steps": ["Soğan, biber, sarımsağı soteleyin.", "Domates ve baharatları ekle, 10 dk pişir.", "Çukurlar açıp yumurtaları kır.", "Kapakla 5-6 dk pişir."], "note": "Sosu önceden yap, yerken yumurta kır."}, {"id": 27, "name": "Çılbır (yoğurtlu yumurta)", "emoji": "🥚", "cat": "egg", "time": "12 dk", "serv": "2", "keeps": "1 gün", "tags": ["Türk usulü", "hızlı"], "ing": ["3 yumurta", "1.5 bardak süzme yoğurt", "1 diş sarımsak", "2 yk tereyağı", "pul biber, tuz"], "steps": ["Yoğurda ezilmiş sarımsak ve tuz karıştır, tabağa yay.", "Suyu kaynatıp poşe yumurta yap (3 dk).", "Yumurtaları yoğurdun üstüne al.", "Tereyağında pul biberi kızdırıp gezdir."], "note": "Anında ye; en taze hali en güzeli."}, {"id": 28, "name": "Patatesli Omlet (tortilla)", "emoji": "🥔", "cat": "egg", "time": "25 dk", "serv": "4", "keeps": "3 gün", "tags": ["doyurucu", "İspanyol"], "ing": ["6 yumurta", "3 patates", "1 soğan", "4 yk zeytinyağı", "tuz"], "steps": ["Patates ve soğanı ince dilimle, yağda yumuşat.", "Çırpılmış yumurtaya karıştır.", "Tavaya dök, kısık ateşte alttan pişir.", "Bir tabak yardımıyla ters çevir, diğer yüzü pişir."], "note": "Soğuk dilimlenir, 3 gün; sandviç arası harika."}, {"id": 29, "name": "Mantarlı Sarımsaklı Yumurta", "emoji": "🍄", "cat": "egg", "time": "12 dk", "serv": "2", "keeps": "1 gün", "tags": ["hızlı", "5 malzeme"], "ing": ["4 yumurta", "200 g mantar (funghi)", "2 diş sarımsak", "2 yk tereyağı", "maydanoz, tuz, karabiber"], "steps": ["Mantarları tereyağında suyunu çekene kadar soteleyin.", "Sarımsağı ekle.", "Yumurtaları kır, karıştırarak pişir.", "Maydanozla servis."], "note": "Hemen ye; kahvaltı veya hafif akşam."}, {"id": 30, "name": "Ispanaklı Yumurta", "emoji": "🥬", "cat": "egg", "time": "12 dk", "serv": "2", "keeps": "1 gün", "tags": ["hızlı", "hafif"], "ing": ["4 yumurta", "150 g ıspanak", "1 diş sarımsak", "2 yk zeytinyağı", "tuz, karabiber"], "steps": ["Sarımsağı yağda ısıt, ıspanağı söndür.", "Yumurtaları kır.", "Karıştırarak istediğin kıvamda pişir.", "Tuz, karabiber."], "note": "Tazeyken ye."}, {"id": 31, "name": "Haşlanmış Yumurtalı Avokado Tost", "emoji": "🥑", "cat": "egg", "time": "8 dk", "serv": "1-2", "keeps": "1 gün", "tags": ["kahvaltı", "hızlı"], "ing": ["2 yumurta", "1 avokado", "2 dilim ekmek (pane integrale)", "limon, pul biber, tuz", "zeytinyağı"], "steps": ["Yumurtaları 7 dk haşla.", "Avokadoyu limonla ez.", "Ekmeği kızart, avokadoyu sür.", "Yumurtayı dilimleyip üstüne, pul biber serp."], "note": "Yumurtayı önceden haşlayıp 3 gün saklayabilirsin."}, {"id": 32, "name": "Sebzeli Mini Yumurta Muffinleri", "emoji": "🧁", "cat": "egg", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["meal prep", "fırın"], "ing": ["6 yumurta", "1 biber", "1 avuç ıspanak", "yarım soğan", "rendelenmiş peynir", "tuz, karabiber"], "steps": ["Sebzeleri ince doğra.", "Çırpılmış yumurtaya sebze ve peyniri ekle.", "Yağlanmış muffin kalıbına dök.", "180°C fırında 18-20 dk."], "note": "Sabah kahvaltısı için ideal; 4 gün, ısıtılır."}, {"id": 33, "name": "Fırında Limonlu Sarımsaklı Tavuk But", "emoji": "🍗", "cat": "chicken", "time": "40 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "fırın"], "ing": ["6 tavuk but (cosce di pollo)", "1 limon", "4 diş sarımsak", "3 yk zeytinyağı", "kekik, tatlı toz biber", "tuz, karabiber"], "steps": ["Butları zeytinyağı, limon, ezilmiş sarımsak ve baharatlarla harmanla.", "Fırın tepsisine diz.", "200°C fırında 35-40 dk, derisi çıtırlasın.", "Pilav veya salatayla."], "note": "4 gün dolapta; etler sulu kalır, tekrar ısıtılır."}, {"id": 34, "name": "Yoğurtlu Tavuk Şiş (fırında)", "emoji": "🍢", "cat": "chicken", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "Türk usulü"], "ing": ["600 g tavuk göğsü kuşbaşı", "1 bardak yoğurt", "2 yk salça", "2 diş sarımsak", "zeytinyağı", "kekik, kimyon, tuz"], "steps": ["Yoğurt, salça, sarımsak ve baharatlarla tavuğu marine et (en az 20 dk).", "Fırın tepsisine yay.", "200°C fırında 20-25 dk.", "Lavaş veya bulgurla servis."], "note": "Marine edip dondurabilirsin; pişmiş hali 4 gün."}, {"id": 35, "name": "Tek Tava Tavuklu Sebze", "emoji": "🍳", "cat": "chicken", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["tek tava", "doyurucu"], "ing": ["500 g tavuk göğsü dilim", "1 kabak", "1 biber", "1 soğan", "1 avuç kiraz domates", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Tavuğu yağda mühürle, kenara al.", "Sebzeleri aynı tavada soteleyin.", "Tavuğu geri ekle, baharatla.", "5 dk birlikte pişir."], "note": "Tam bir meal-prep yemeği; 4 gün."}, {"id": 36, "name": "Köri Soslu Tavuk", "emoji": "🍛", "cat": "chicken", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["doyurucu", "protein"], "ing": ["500 g tavuk göğsü kuşbaşı", "1 soğan", "1 yk köri", "1 ts zerdeçal", "1 kutu hindistan cevizi sütü", "2 diş sarımsak", "zeytinyağı, tuz"], "steps": ["Soğan ve sarımsağı yağda kavur, baharatları ekle.", "Tavuğu ekle, rengi dönsün.", "Hindistan cevizi sütünü dök, 15 dk pişir.", "Pirinçle servis."], "note": "Pirinci ayrı sakla; sos 4 gün, dondurulabilir."}, {"id": 37, "name": "Tavuklu Bulgur Pilavı", "emoji": "🍲", "cat": "chicken", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["doyurucu", "tek tencere"], "ing": ["400 g tavuk kuşbaşı", "1.5 bardak iri bulgur", "1 soğan", "1 yk salça", "zeytinyağı", "tuz, karabiber"], "steps": ["Tavuğu yağda mühürle.", "Soğan ve salçayı ekle, kavur.", "Bulgur ve 3 bardak sıcak su koy.", "15 dk pişir, demlendir."], "note": "Tek tencere; 4 gün, ısıtması kolay."}, {"id": 38, "name": "Balzamik Soslu Izgara Tavuk", "emoji": "🍗", "cat": "chicken", "time": "25 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "hafif"], "ing": ["4 tavuk göğsü", "3 yk balzamik sirke (aceto balsamico)", "2 yk zeytinyağı", "1 yk bal (miele)", "1 diş sarımsak", "kekik, tuz"], "steps": ["Tavukları balzamik, yağ, bal, sarımsakla marine et.", "Izgara tavada her yüzü 5-6 dk pişir.", "Dinlendirip dilimle.", "Salatayla servis."], "note": "Soğuk salatalara da eklenir; 4 gün."}, {"id": 39, "name": "Tavuklu Çıtır Tortilla Dürüm", "emoji": "🌯", "cat": "chicken", "time": "20 dk", "serv": "3-4", "keeps": "2 gün", "tags": ["hızlı", "pratik"], "ing": ["400 g tavuk dilim", "4 tortilla (piadina)", "1 marul", "1 domates", "yoğurtlu sarımsaklı sos", "zeytinyağı", "kimyon, tuz"], "steps": ["Tavuğu baharatlayıp tavada pişir.", "Tortillayı ısıt.", "Sos, marul, domates ve tavuğu koy.", "Sıkıca dürüp ikiye böl."], "note": "Tavuğu önceden pişir, yerken dürüm yap."}, {"id": 40, "name": "Fırın Tavuk Şinitzel (panemiş)", "emoji": "🍗", "cat": "chicken", "time": "35 dk", "serv": "4", "keeps": "3 gün", "tags": ["çocuk dostu", "fırın"], "ing": ["4 tavuk göğsü (incelt)", "2 yumurta", "1.5 bardak galeta unu (pangrattato)", "yarım bardak un", "zeytinyağı", "tuz, karabiber"], "steps": ["Tavuğu una, yumurtaya, galeta ununa sırayla bula.", "Tepsiye diz, üstüne zeytinyağı gezdir.", "200°C fırında 25 dk, çevirerek.", "Limon ve salatayla."], "note": "Kızartmadan çıtır; 3 gün, fırında ısıtılır."}, {"id": 41, "name": "Tavuklu Mercimekli Tencere", "emoji": "🥘", "cat": "chicken", "time": "35 dk", "serv": "5", "keeps": "4 gün", "tags": ["doyurucu", "tek tencere"], "ing": ["400 g tavuk kuşbaşı", "1 bardak yeşil mercimek", "1 soğan, 1 havuç", "1 kutu doğranmış domates", "zeytinyağı", "kimyon, tuz"], "steps": ["Tavuğu mühürle, sebzeleri ekle.", "Domates, mercimek ve 2 bardak su koy.", "Kapakla 25 dk pişir.", "Baharatla bitir."], "note": "Tam doyurucu kış yemeği; 4 gün, dondurulabilir."}, {"id": 42, "name": "Soya Soslu Tavuklu Erişte", "emoji": "🍜", "cat": "chicken", "time": "20 dk", "serv": "3-4", "keeps": "3 gün", "tags": ["hızlı", "tek tava"], "ing": ["300 g erişte/noodle", "400 g tavuk dilim", "1 biber, 1 havuç", "3 yk soya sosu", "2 diş sarımsak", "yağ, yeşil soğan"], "steps": ["Erişteyi haşla, süz.", "Tavuğu yağda pişir, kenara al.", "Sebzeleri sotele, sarımsak ekle.", "Erişte, tavuk ve soya sosunu karıştır."], "note": "Stir-fry mantığı; 3 gün."}, {"id": 43, "name": "Domates Soslu Köfte (fırında)", "emoji": "🍡", "cat": "chicken", "time": "35 dk", "serv": "4", "keeps": "4 gün", "tags": ["protein", "fırın"], "ing": ["500 g tavuk veya dana kıyma", "1 soğan", "1 yumurta", "yarım bardak galeta unu", "1 kutu passata", "zeytinyağı", "kimyon, kekik, tuz"], "steps": ["Kıyma, rendelenmiş soğan, yumurta, galeta unu ve baharatı yoğur.", "Köfte yap, tepsiye diz.", "Üstüne passatayı dök.", "200°C fırında 25 dk."], "note": "Makarna veya pilav yanına; 4 gün."}, {"id": 44, "name": "Ezogelin Çorbası", "emoji": "🍲", "cat": "soup", "time": "30 dk", "serv": "5", "keeps": "4 gün", "tags": ["Türk usulü", "doyurucu"], "ing": ["1 bardak kırmızı mercimek", "yarım bardak bulgur", "2 yk pirinç", "1 soğan", "1 yk salça", "nane, pul biber", "zeytinyağı, tuz"], "steps": ["Soğanı salçayla kavur.", "Mercimek, bulgur, pirinç ve 6 bardak su ekle.", "25 dk pişir.", "Nane ve pul biberli yağ gezdir."], "note": "Klasik batch çorba; 4 gün, dondurulabilir."}, {"id": 45, "name": "Kremalı Mantar Çorbası", "emoji": "🍄", "cat": "soup", "time": "25 dk", "serv": "4", "keeps": "3 gün", "tags": ["kremamsı", "sebzeli"], "ing": ["400 g mantar", "1 soğan", "2 diş sarımsak", "2 yk un", "1 bardak süt", "tereyağı", "tuz, karabiber"], "steps": ["Soğan, sarımsak, mantarı tereyağında soteleyin.", "Unu ekle kavur, 3 bardak su ekle.", "Süt ekle, blenderdan geçir.", "5 dk kaynat, baharatla."], "note": "3 gün; süt olduğu için kaynatmadan ısıt."}, {"id": 46, "name": "Domates Çorbası", "emoji": "🍅", "cat": "soup", "time": "25 dk", "serv": "4", "keeps": "4 gün", "tags": ["klasik", "sebzeli"], "ing": ["1 kutu pelati", "1 soğan", "2 diş sarımsak", "1 patates", "2 yk zeytinyağı", "fesleğen (basilico)", "tuz, karabiber"], "steps": ["Soğan ve sarımsağı soteleyin.", "Domates, patates ve 3 bardak su ekle.", "15 dk pişir, blenderdan geçir.", "Fesleğenle servis."], "note": "4 gün; kızarmış ekmekle güzel."}, {"id": 47, "name": "Yayla Çorbası", "emoji": "🍚", "cat": "soup", "time": "25 dk", "serv": "5", "keeps": "3 gün", "tags": ["Türk usulü", "yoğurtlu"], "ing": ["yarım bardak pirinç", "1 bardak yoğurt", "1 yumurta sarısı", "1 yk un", "2 yk tereyağı", "kuru nane, tuz"], "steps": ["Pirinci 5 bardak suda haşla.", "Yoğurt, yumurta, unu çırp, çorbaya yavaşça ekle.", "Sürekli karıştırarak kaynat.", "Naneli tereyağı gezdir."], "note": "Yoğurtlu; 3 günde tüket, kaynatmadan ısıt."}, {"id": 48, "name": "Sebze Çorbası (minestrone)", "emoji": "🥕", "cat": "soup", "time": "35 dk", "serv": "6", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1 kutu fasulye (borlotti)", "1 havuç, 1 kabak, 1 patates", "1 soğan, 2 kereviz sapı", "1 kutu doğranmış domates", "yarım bardak küçük makarna", "zeytinyağı, tuz"], "steps": ["Sebzeleri küp doğra, yağda 7 dk soteleyin.", "Domates, fasulye ve 5 bardak su ekle.", "15 dk pişir, makarnayı ekle.", "Makarna pişince servis."], "note": "Klasik İtalyan batch çorbası; 4 gün."}, {"id": 49, "name": "Brokoli Çorbası", "emoji": "🥦", "cat": "soup", "time": "20 dk", "serv": "4", "keeps": "3 gün", "tags": ["sebzeli", "hafif"], "ing": ["1 baş brokoli", "1 patates", "1 soğan", "2 diş sarımsak", "zeytinyağı", "parmigiano", "tuz, karabiber"], "steps": ["Soğan ve sarımsağı soteleyin.", "Brokoli, patates ve 3 bardak su ekle.", "12 dk pişir, blenderdan geçir.", "Parmigiano serp."], "note": "3 gün; krema gibi yoğun."}, {"id": 50, "name": "Tarhana Çorbası", "emoji": "🥣", "cat": "soup", "time": "20 dk", "serv": "4", "keeps": "4 gün", "tags": ["Türk usulü", "pratik"], "ing": ["3 yk tarhana", "1 yk salça", "2 yk tereyağı/zeytinyağı", "4 bardak su", "pul biber, tuz"], "steps": ["Salçayı yağda kavur.", "Tarhanayı ekle, kısaca çevir.", "Suyu yavaşça ekle, topaklanmasın.", "10 dk kaynat, baharatla."], "note": "Tarhanan varsa en hızlı çorba; 4 gün."}, {"id": 51, "name": "Bezelye Çorbası", "emoji": "🟢", "cat": "soup", "time": "20 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "hafif"], "ing": ["400 g bezelye (piselli)", "1 soğan", "1 patates", "2 diş sarımsak", "zeytinyağı", "nane, tuz"], "steps": ["Soğan ve sarımsağı soteleyin.", "Bezelye, patates ve 3 bardak su ekle.", "12 dk pişir, blenderdan geçir.", "Nane ile servis."], "note": "Taze yeşil renk için fazla kaynatma; 3 gün."}, {"id": 52, "name": "Nohutlu Sebze Çorbası", "emoji": "🫘", "cat": "soup", "time": "25 dk", "serv": "5", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1 kutu nohut", "1 havuç, 1 patates, 1 soğan", "1 yk salça", "zeytinyağı", "kimyon, tuz, karabiber"], "steps": ["Soğanı salçayla kavur.", "Sebzeleri ve nohutu ekle.", "5 bardak su koy, 18 dk pişir.", "Yarısını ezip kıvam ver."], "note": "Doyurucu; 4 gün, dondurulabilir."}, {"id": 53, "name": "Balkabağı Çorbası", "emoji": "🎃", "cat": "soup", "time": "30 dk", "serv": "5", "keeps": "4 gün", "tags": ["vegan", "kremamsı"], "ing": ["600 g balkabağı (zucca)", "1 soğan", "1 havuç", "2 diş sarımsak", "yarım kutu hindistan cevizi sütü", "zeytinyağı", "zencefil, tuz"], "steps": ["Soğan, sarımsak, havuç ve balkabağını soteleyin.", "4 bardak su ekle, 20 dk pişir.", "Blenderdan geçir, hindistan cevizi sütünü ekle.", "Zencefil ve tuzla bitir."], "note": "Tatlı ve kremamsı; 4 gün, dondurulabilir."}, {"id": 54, "name": "Ton Balıklı Fasulye Salatası", "emoji": "🥗", "cat": "salad", "time": "10 dk", "serv": "3", "keeps": "2 gün", "tags": ["protein", "hızlı"], "ing": ["2 kutu cannellini fasulye", "1 kutu ton balığı", "1 kırmızı soğan", "maydanoz", "zeytinyağı, limon", "tuz, karabiber"], "steps": ["Fasulyeyi süz, kaseye al.", "Ton balığı ve doğranmış soğanı ekle.", "Zeytinyağı, limon, tuz koy.", "Maydanozla karıştır."], "note": "Hemen ye veya 2 gün; çok doyurucu."}, {"id": 55, "name": "Kısır", "emoji": "🌶️", "cat": "salad", "time": "20 dk", "serv": "5", "keeps": "3 gün", "tags": ["vegan", "Türk usulü"], "ing": ["1.5 bardak ince bulgur", "2 yk salça", "1 yk nar ekşisi (melagrana)", "yeşil soğan, maydanoz", "salatalık, domates", "zeytinyağı, kimyon"], "steps": ["Bulguru sıcak suyla ıslat, 15 dk bekle.", "Salça, nar ekşisi, zeytinyağı ekle.", "Doğranmış yeşillik ve sebzeleri karıştır.", "Marul yaprağıyla."], "note": "Buzdolabında 3 gün; öğle için ideal."}, {"id": 56, "name": "Akdeniz Kinoa Kasesi", "emoji": "🥗", "cat": "salad", "time": "20 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "meal prep"], "ing": ["1 bardak kinoa", "1 salatalık", "1 avuç kiraz domates", "yarım kırmızı soğan", "zeytin (olive)", "zeytinyağı, limon", "maydanoz, tuz"], "steps": ["Kinoayı 2 bardak suyla 15 dk pişir, soğut.", "Sebzeleri doğra.", "Hepsini karıştır.", "Zeytinyağı ve limonla."], "note": "Soğuk servis; 3 gün, lunch box için süper."}, {"id": 57, "name": "Tavuklu Sezar Tarzı Salata", "emoji": "🥬", "cat": "salad", "time": "15 dk", "serv": "3", "keeps": "1 gün", "tags": ["protein", "doyurucu"], "ing": ["1 ızgara tavuk göğsü", "1 marul (lattuga romana)", "kruton (kızarmış ekmek)", "parmigiano", "yoğurt, sarımsak, limon (sos)", "tuz, karabiber"], "steps": ["Yoğurt, sarımsak, limon ve tuzla sos yap.", "Maruları doğra.", "Dilimlenmiş tavuk, kruton, parmigiano ekle.", "Sosu yerken karıştır."], "note": "Sosu ayrı tut; yapısı bozulmasın diye taze ye."}, {"id": 58, "name": "Mercimekli Roka Salatası", "emoji": "🥗", "cat": "salad", "time": "25 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "protein"], "ing": ["1 bardak yeşil mercimek", "1 avuç roka (rucola)", "1 avuç kiraz domates", "kırmızı soğan", "zeytinyağı, balzamik", "tuz, karabiber"], "steps": ["Mercimeği yumuşayana kadar haşla, soğut.", "Roka, domates, soğanı ekle.", "Zeytinyağı ve balzamik gezdir.", "Tuz ve karabiberle."], "note": "Mercimeği önceden haşla; 3 gün dolapta."}, {"id": 59, "name": "Çoban Salatası", "emoji": "🥒", "cat": "salad", "time": "10 dk", "serv": "4", "keeps": "1 gün", "tags": ["vegan", "hızlı"], "ing": ["3 domates", "2 salatalık", "1 soğan", "1 biber", "maydanoz", "zeytinyağı, limon", "tuz, sumak"], "steps": ["Tüm sebzeleri küp doğra.", "Maydanozu ekle.", "Zeytinyağı, limon, tuz, sumak koy.", "Karıştır."], "note": "Taze ye; yanına peynir koyarsan doyurucu olur."}, {"id": 60, "name": "Patates Salatası (mayonezsiz)", "emoji": "🥔", "cat": "salad", "time": "25 dk", "serv": "5", "keeps": "3 gün", "tags": ["vegan", "yan yemek"], "ing": ["6 patates", "1 kırmızı soğan", "maydanoz", "yeşil soğan", "zeytinyağı, hardal (senape), sirke", "tuz, karabiber"], "steps": ["Patatesleri haşla, ılıkken küp doğra.", "Soğan ve yeşillikleri ekle.", "Zeytinyağı, hardal, sirke sosunu dök.", "Tuz, karabiberle karıştır."], "note": "Ilıkken sosla, lezzet otursun; 3 gün."}, {"id": 61, "name": "Nohutlu Avokado Kase", "emoji": "🥑", "cat": "salad", "time": "10 dk", "serv": "2", "keeps": "1 gün", "tags": ["vegan", "hızlı"], "ing": ["1 kutu nohut", "1 avokado", "1 avuç kiraz domates", "kırmızı soğan", "limon, zeytinyağı", "kişniş/maydanoz, tuz"], "steps": ["Nohutu süz, kaseye al.", "Avokado, domates, soğanı ekle.", "Limon ve zeytinyağı koy.", "Hafifçe karıştır."], "note": "Avokado kararmasın diye günü gününe; çok doyurucu."}, {"id": 62, "name": "Bulgurlu Yeşil Salata (tabbouleh)", "emoji": "🌿", "cat": "salad", "time": "20 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "Akdeniz"], "ing": ["1 bardak ince bulgur", "2 demet maydanoz", "1 demet nane", "2 domates", "limon, zeytinyağı", "tuz, karabiber"], "steps": ["Bulguru sıcak suyla ıslat, 15 dk bekle.", "Bol doğranmış maydanoz ve naneyi ekle.", "Domates, limon, zeytinyağı koy.", "Tuz ve karabiberle."], "note": "Yeşillik ağırlıklı, ferah; 3 gün."}, {"id": 63, "name": "Pancarlı Keçi Peyniri Salatası", "emoji": "🥗", "cat": "salad", "time": "10 dk", "serv": "3", "keeps": "2 gün", "tags": ["vejetaryen", "şık"], "ing": ["2 haşlanmış pancar (barbabietola)", "100 g keçi peyniri (formaggio caprino)", "1 avuç roka", "1 avuç ceviz (noci)", "zeytinyağı, balzamik", "tuz"], "steps": ["Pancarı dilimle.", "Roka üstüne diz.", "Keçi peyniri ve cevizi serp.", "Zeytinyağı ve balzamikle."], "note": "Hazır haşlanmış pancarla 5 dakika; 2 gün."}, {"id": 64, "name": "Karışık Tahıl Kasesi (buddha bowl)", "emoji": "🍱", "cat": "salad", "time": "25 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "meal prep"], "ing": ["1 bardak kinoa veya bulgur", "1 kutu nohut", "1 avuç ıspanak", "1 havuç (rendelenmiş)", "yarım avokado", "tahin-limon sos", "tuz"], "steps": ["Tahılı pişir, soğut.", "Kaseye tahıl, nohut, sebzeleri yerleştir.", "Tahin, limon, su ile sos yap.", "Üstüne gezdir."], "note": "Bileşenleri ayrı sakla, yerken birleştir; 3 gün."}, {"id": 65, "name": "Tek Tepsi Tavuk + Sebze", "emoji": "🍗", "cat": "oven", "time": "45 dk", "serv": "4", "keeps": "4 gün", "tags": ["tek tepsi", "doyurucu"], "ing": ["6 tavuk but", "3 patates", "2 havuç", "1 soğan", "zeytinyağı", "kekik, tatlı toz biber", "tuz, karabiber"], "steps": ["Sebzeleri iri doğra, tepsiye yay.", "Tavukları üstüne diz.", "Zeytinyağı ve baharatlarla harmanla.", "200°C fırında 40 dk."], "note": "Tek tepside komple öğün; 4 gün."}, {"id": 66, "name": "Fırında Sebzeli Patates", "emoji": "🥔", "cat": "oven", "time": "40 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "yan yemek"], "ing": ["4 patates", "1 kabak", "1 biber", "1 soğan", "4 yk zeytinyağı", "kekik, sarımsak tozu", "tuz"], "steps": ["Sebzeleri eşit doğra.", "Zeytinyağı ve baharatlarla harmanla.", "Tepsiye tek kat yay.", "200°C fırında 35-40 dk."], "note": "Yanına yoğurt veya peynir; 4 gün."}, {"id": 67, "name": "Fırında Somon + Sebze", "emoji": "🐟", "cat": "oven", "time": "25 dk", "serv": "3", "keeps": "2 gün", "tags": ["protein", "tek tepsi"], "ing": ["3 somon fileto (salmone)", "1 avuç kiraz domates", "1 kabak", "1 limon", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Somon ve sebzeleri tepsiye diz.", "Limon, zeytinyağı, baharat gezdir.", "200°C fırında 18-20 dk.", "Limon dilimiyle servis."], "note": "Balık olduğu için 2 günde tüket."}, {"id": 68, "name": "Fırın Köfteli Patates", "emoji": "🍡", "cat": "oven", "time": "40 dk", "serv": "4", "keeps": "4 gün", "tags": ["doyurucu", "tek tepsi"], "ing": ["500 g kıyma", "1 soğan", "1 yumurta", "4 patates", "1 kutu passata", "zeytinyağı", "kimyon, tuz"], "steps": ["Kıyma, soğan, yumurta ve baharatı yoğur, köfte yap.", "Patatesleri dilimle, tepsiye köftelerle diz.", "Üstüne passata ve biraz su dök.", "200°C fırında 35 dk."], "note": "Klasik fırın yemeği; 4 gün."}, {"id": 69, "name": "Fırında Karnabahar (bütün)", "emoji": "🤍", "cat": "oven", "time": "40 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "şık"], "ing": ["1 karnabahar", "3 yk zeytinyağı", "1 ts kimyon", "1 ts toz biber", "1 ts zerdeçal", "tuz", "tahin sos (servis)"], "steps": ["Karnabaharı bütün haşla (5 dk).", "Yağ ve baharat karışımıyla ovala.", "Tepside 200°C, 30 dk.", "Tahin sosuyla servis."], "note": "Görsel ve doyurucu; 3 gün."}, {"id": 70, "name": "Fırın Sebzeli Mozzarella (parmigiana)", "emoji": "🧀", "cat": "oven", "time": "45 dk", "serv": "4", "keeps": "4 gün", "tags": ["vejetaryen", "doyurucu"], "ing": ["2 patlıcan (melanzane)", "1 kutu passata", "200 g mozzarella", "parmigiano", "zeytinyağı", "fesleğen, tuz"], "steps": ["Patlıcanları dilimle, fırında ön pişir.", "Kabın dibine sos, patlıcan, mozzarella dizerek katla.", "Üstüne parmigiano.", "190°C fırında 25 dk."], "note": "Soğuk da güzel; 4 gün."}, {"id": 71, "name": "Fırın Tavuklu Pilav (oven rice)", "emoji": "🍚", "cat": "oven", "time": "45 dk", "serv": "4", "keeps": "4 gün", "tags": ["tek tepsi", "pratik"], "ing": ["1.5 bardak pirinç", "4 tavuk but", "1 soğan", "3 bardak sıcak su/bulyon", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Pirinç ve soğanı fırın kabına yay.", "Sıcak suyu ve baharatı ekle.", "Tavukları üstüne diz, zeytinyağı gezdir.", "Folyoyla 200°C 35 dk, sonra açık 10 dk."], "note": "Tek kapta pirinç+tavuk; 4 gün."}, {"id": 72, "name": "Fırında Baharatlı Tatlı Patates", "emoji": "🍠", "cat": "oven", "time": "35 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "yan yemek"], "ing": ["3 tatlı patates (patata dolce)", "3 yk zeytinyağı", "1 ts toz biber", "1 ts kimyon", "tuz, karabiber"], "steps": ["Tatlı patatesi dilimle.", "Yağ ve baharatlarla harmanla.", "Tepsiye tek kat yay.", "200°C fırında 30 dk."], "note": "Kaselerin içine ekle; 4 gün."}, {"id": 73, "name": "Fırın Tepsi Sebzeli Sosis", "emoji": "🌭", "cat": "oven", "time": "35 dk", "serv": "4", "keeps": "3 gün", "tags": ["doyurucu", "tek tepsi"], "ing": ["4 sosis (salsiccia)", "2 biber", "1 soğan", "2 patates", "zeytinyağı", "kekik, tuz, karabiber"], "steps": ["Sebzeleri doğra, tepsiye yay.", "Sosisleri ekle.", "Zeytinyağı ve baharat gezdir.", "200°C fırında 30 dk."], "note": "Çok pratik akşam yemeği; 3 gün."}, {"id": 74, "name": "Fırında Brokoli + Nohut", "emoji": "🥦", "cat": "oven", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "protein"], "ing": ["1 baş brokoli", "1 kutu nohut", "3 yk zeytinyağı", "1 ts toz biber", "sarımsak tozu", "tuz"], "steps": ["Brokoli ve nohutu yağ-baharatla harmanla.", "Tepsiye yay.", "200°C fırında 25 dk.", "Tahin veya yoğurt sosuyla."], "note": "Kaselere ekle; 4 gün."}, {"id": 75, "name": "Fırın Mantarlı Patates Graten", "emoji": "🥔", "cat": "oven", "time": "45 dk", "serv": "5", "keeps": "4 gün", "tags": ["vejetaryen", "kremamsı"], "ing": ["6 patates", "200 g mantar", "1 bardak süt/krema", "2 diş sarımsak", "rendelenmiş peynir", "tereyağı", "muskat, tuz"], "steps": ["Patatesleri ince dilimle.", "Süt, sarımsak, baharatı karıştır.", "Kaba patates ve mantarı dizip karışımı dök.", "Peynirle 190°C 40 dk."], "note": "Doyurucu yan yemek; 4 gün."}, {"id": 76, "name": "Gece Yulafı (overnight oats)", "emoji": "🥣", "cat": "breakfast", "time": "5 dk", "serv": "1", "keeps": "3 gün", "tags": ["meal prep", "hazırla-bırak"], "ing": ["yarım bardak yulaf (avena)", "1 bardak süt veya yoğurt", "1 yk chia", "1 yk bal", "meyve (muz, böğürtlen)", "tarçın"], "steps": ["Yulaf, süt, chia, balı kavanozda karıştır.", "Gece buzdolabında beklet.", "Sabah meyve ekle.", "Tarçınla servis."], "note": "3 kavanoz birden yap; 3 gün hazır kahvaltı."}, {"id": 77, "name": "Peynirli Sebzeli Gözleme (tava)", "emoji": "🫓", "cat": "breakfast", "time": "20 dk", "serv": "3", "keeps": "2 gün", "tags": ["Türk usulü", "doyurucu"], "ing": ["4 yufka/tortilla", "200 g beyaz peynir (feta)", "1 avuç ıspanak", "maydanoz", "tereyağı", "tuz, karabiber"], "steps": ["Peynir, ıspanak, maydanozu karıştır.", "Yufkaya koy, katla.", "Tereyağlı tavada her yüzü kızart.", "Sıcak servis."], "note": "Soğuk da yenir; tekrar tavada ısıt."}, {"id": 78, "name": "Muzlu Yulaf Pankek", "emoji": "🥞", "cat": "breakfast", "time": "15 dk", "serv": "2", "keeps": "2 gün", "tags": ["sağlıklı", "tatlı"], "ing": ["1 muz", "2 yumurta", "yarım bardak yulaf", "1 ts kabartma tozu", "tarçın", "yağ", "bal (servis)"], "steps": ["Muzu ez, yumurta ve yulafı ekle.", "Kabartma tozu ve tarçını karıştır.", "Yağlı tavada küçük pankekler pişir.", "Balla servis."], "note": "Önceden yapıp ısıtabilirsin; 2 gün."}, {"id": 79, "name": "Avokadolu Yumurtalı Tost", "emoji": "🥑", "cat": "breakfast", "time": "8 dk", "serv": "1", "keeps": "1 gün", "tags": ["hızlı", "doyurucu"], "ing": ["2 dilim tam buğday ekmek", "1 avokado", "2 yumurta", "limon, pul biber", "zeytinyağı, tuz"], "steps": ["Ekmeği kızart.", "Avokadoyu limonla ez, sür.", "Yumurtayı sahanda pişir.", "Üstüne koy, pul biber serp."], "note": "Anında ye; en doyurucu hızlı kahvaltı."}, {"id": 80, "name": "Yoğurt Granola Parfe", "emoji": "🍓", "cat": "breakfast", "time": "5 dk", "serv": "1", "keeps": "1 gün", "tags": ["hızlı", "5 malzeme"], "ing": ["1 bardak yoğurt", "yarım bardak granola", "1 yk bal", "meyve (çilek, yaban mersini)", "ceviz/badem"], "steps": ["Kaseye yoğurdu koy.", "Granola serp.", "Meyve ve kuruyemiş ekle.", "Balla bitir."], "note": "Granolayı ayrı tut, çıtır kalsın."}, {"id": 81, "name": "Sebzeli Sigara Böreği (fırın)", "emoji": "🥟", "cat": "breakfast", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["Türk usulü", "atıştırmalık"], "ing": ["1 paket yufka (sfoglia ince)", "200 g lor/peynir", "maydanoz", "1 yumurta", "zeytinyağı", "tuz"], "steps": ["Peynir ve maydanozu karıştır.", "Yufkaya koyup sıkıca rulo yap.", "Üstüne yumurta sürüp tepsiye diz.", "190°C fırında 20 dk."], "note": "Çıtır atıştırmalık; 3 gün, fırında ısıt."}, {"id": 82, "name": "Smoothie Kase", "emoji": "🫐", "cat": "breakfast", "time": "5 dk", "serv": "1", "keeps": "1 gün", "tags": ["hızlı", "sağlıklı"], "ing": ["1 donmuş muz", "1 avuç donmuş meyve", "yarım bardak yoğurt", "1 yk fıstık ezmesi", "granola, chia (üst)"], "steps": ["Muz, meyve, yoğurt, fıstık ezmesini blenderdan geçir.", "Kaseye al.", "Granola ve chia serp.", "Hemen ye."], "note": "Donmuş meyveyle anında; günü gününe."}, {"id": 83, "name": "Menemenli Bazlama Sandviç", "emoji": "🥪", "cat": "breakfast", "time": "15 dk", "serv": "2", "keeps": "1 gün", "tags": ["doyurucu", "Türk usulü"], "ing": ["2 bazlama/ekmek", "3 yumurta", "1 domates", "1 biber", "beyaz peynir", "zeytinyağı, tuz"], "steps": ["Biber ve domatesi soteleyin.", "Yumurtaları kır, menemen yap.", "Ekmeğin arasına koy.", "Peynir ekleyip sıcak ye."], "note": "Sıcak ye; doyurucu kahvaltı sandviçi."}, {"id": 84, "name": "Zeytinyağlı Taze Fasulye", "emoji": "🫛", "cat": "veggie", "time": "30 dk", "serv": "4", "keeps": "5 gün", "tags": ["vegan", "zeytinyağlı"], "ing": ["500 g taze fasulye (fagiolini)", "2 domates", "1 soğan", "1 ts şeker", "zeytinyağı", "tuz"], "steps": ["Soğanı zeytinyağında soteleyin.", "Fasulye, domates, şeker ekle.", "Yarım bardak su koy, kapakla 20 dk pişir.", "Soğuyunca servis."], "note": "Soğuk yenir, 5 gün; en lezzetli ertesi gün."}, {"id": 85, "name": "Imam Bayıldı (kolay)", "emoji": "🍆", "cat": "veggie", "time": "40 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "Türk usulü"], "ing": ["3 patlıcan", "2 soğan", "3 domates", "4 diş sarımsak", "maydanoz", "zeytinyağı", "şeker, tuz"], "steps": ["Patlıcanları fırında yumuşat.", "Soğan, sarımsak, domatesle iç harç yap.", "Patlıcanların içini aç, harcı doldur.", "Az suyla 180°C 20 dk."], "note": "Soğuk servis; 4 gün, ertesi gün daha güzel."}, {"id": 86, "name": "Zeytinyağlı Pırasa", "emoji": "🥬", "cat": "veggie", "time": "30 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "zeytinyağlı"], "ing": ["3 pırasa (porro)", "1 havuç", "2 yk pirinç", "1 ts şeker", "zeytinyağı, limon", "tuz"], "steps": ["Pırasa ve havucu doğra.", "Zeytinyağında soteleyin.", "Pirinç, şeker, limon ve az su ekle.", "Kapakla 20 dk pişir."], "note": "Soğuk yenir; 4 gün."}, {"id": 87, "name": "Sebzeli Türlü", "emoji": "🥘", "cat": "veggie", "time": "40 dk", "serv": "5", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1 patlıcan, 1 kabak, 1 biber", "2 patates", "1 soğan", "1 kutu doğranmış domates", "zeytinyağı", "tuz, karabiber"], "steps": ["Sebzeleri iri doğra.", "Soğanı soteleyip sebzeleri ekle.", "Domates ve yarım bardak su koy.", "Kapakla 30 dk pişir."], "note": "Klasik türlü; 4 gün, ısıtması kolay."}, {"id": 88, "name": "Karnabahar Mücver (fırın)", "emoji": "🥦", "cat": "veggie", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["vejetaryen", "fırın"], "ing": ["yarım karnabahar (rendelenmiş)", "2 yumurta", "yarım bardak un", "yeşil soğan, dereotu", "zeytinyağı", "tuz, karabiber"], "steps": ["Karnabaharı rendele, suyunu sık.", "Yumurta, un, yeşillik ekle.", "Kaşıkla tepsiye küçük öbekler koy.", "200°C fırında 20 dk."], "note": "Yoğurtla servis; 3 gün."}, {"id": 89, "name": "Fırın Patlıcan Közleme Salatası", "emoji": "🍆", "cat": "veggie", "time": "35 dk", "serv": "4", "keeps": "3 gün", "tags": ["vegan", "meze"], "ing": ["3 patlıcan", "2 diş sarımsak", "limon", "zeytinyağı", "maydanoz", "tuz"], "steps": ["Patlıcanları fırında közle (30 dk).", "Kabuğunu soyup ez.", "Sarımsak, limon, zeytinyağı ekle.", "Maydanozla servis."], "note": "Meze veya kahvaltılık; 3 gün."}, {"id": 90, "name": "Sebzeli Bulgur Sote", "emoji": "🌾", "cat": "veggie", "time": "25 dk", "serv": "4", "keeps": "4 gün", "tags": ["vegan", "doyurucu"], "ing": ["1.5 bardak iri bulgur", "1 biber, 1 soğan", "1 kabak", "1 yk salça", "zeytinyağı", "tuz, karabiber"], "steps": ["Soğan ve biberi salçayla kavur.", "Kabağı ekle, soteleyin.", "Bulgur ve 3 bardak sıcak su koy.", "15 dk pişir, demlendir."], "note": "Tek tencere; 4 gün."}, {"id": 91, "name": "Mantar Sote", "emoji": "🍄", "cat": "veggie", "time": "15 dk", "serv": "3", "keeps": "3 gün", "tags": ["vejetaryen", "hızlı"], "ing": ["400 g mantar", "1 soğan", "2 diş sarımsak", "tereyağı", "maydanoz", "tuz, karabiber"], "steps": ["Soğan ve sarımsağı tereyağında soteleyin.", "Mantarları ekle, suyunu çektir.", "Tuz, karabiber.", "Maydanozla servis."], "note": "Yan yemek veya makarna sosu; 3 gün."}, {"id": 92, "name": "Fırın Kabak Köftesi", "emoji": "🟢", "cat": "veggie", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["vejetaryen", "fırın"], "ing": ["2 kabak (rendelenmiş)", "2 yumurta", "yarım bardak galeta unu", "100 g feta", "dereotu", "tuz, karabiber"], "steps": ["Kabağı rendele, tuzla, suyunu sık.", "Yumurta, galeta unu, feta, dereotu ekle.", "Köfte yapıp tepsiye diz.", "200°C fırında 22 dk."], "note": "Yoğurtla; 3 gün, fırında ısıt."}, {"id": 93, "name": "Tava Tereyağında Levrek", "emoji": "🐟", "cat": "fish", "time": "15 dk", "serv": "2", "keeps": "1 gün", "tags": ["protein", "hızlı"], "ing": ["2 levrek fileto (branzino)", "2 yk tereyağı", "1 limon", "sarımsak", "maydanoz", "tuz, karabiber"], "steps": ["Filetoyu tuzla.", "Tereyağında derili yüz aşağı 4 dk.", "Çevir, sarımsak ve limon ekle 2 dk.", "Maydanozla servis."], "note": "Balık taze tüketilir; günü gününe."}, {"id": 94, "name": "Fırında Sardalya", "emoji": "🐟", "cat": "fish", "time": "20 dk", "serv": "3", "keeps": "2 gün", "tags": ["protein", "ucuz"], "ing": ["500 g sardalya (sarde)", "limon", "sarımsak", "zeytinyağı", "kekik", "tuz, karabiber"], "steps": ["Sardalyaları temizleyip tepsiye diz.", "Limon, sarımsak, zeytinyağı, baharat gezdir.", "200°C fırında 15 dk.", "Limonla servis."], "note": "Cenova'da bol ve ucuz; 2 gün."}, {"id": 95, "name": "Ton Balıklı Patates Köftesi (fırın)", "emoji": "🥔", "cat": "fish", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["protein", "fırın"], "ing": ["3 haşlanmış patates", "2 kutu ton balığı", "1 yumurta", "yeşil soğan, maydanoz", "galeta unu", "tuz, karabiber"], "steps": ["Patatesi ez, ton balığı ve yumurta ekle.", "Yeşillik ve baharatı karıştır.", "Köfte yapıp galeta ununa bula.", "200°C fırında 25 dk."], "note": "Soğuk da güzel; 3 gün."}, {"id": 96, "name": "Karidesli Sarımsaklı Makarna", "emoji": "🍤", "cat": "fish", "time": "20 dk", "serv": "3", "keeps": "1 gün", "tags": ["protein", "şık"], "ing": ["300 g spaghetti", "250 g karides (gamberi)", "3 diş sarımsak", "peperoncino", "zeytinyağı", "maydanoz, limon"], "steps": ["Sarımsak ve acıyı yağda ısıt.", "Karidesleri ekle, 3 dk pişir.", "Haşlanmış makarnayı ekle, makarna suyuyla harmanla.", "Maydanoz ve limonla."], "note": "Deniz ürünü; günü gününe ye."}, {"id": 97, "name": "Fırın Somonlu Pilav Kase", "emoji": "🍚", "cat": "fish", "time": "30 dk", "serv": "3", "keeps": "2 gün", "tags": ["protein", "doyurucu"], "ing": ["2 somon fileto", "1.5 bardak pişmiş pirinç", "1 avokado", "salatalık", "soya sosu, susam", "zeytinyağı"], "steps": ["Somonu fırında pişir (15 dk).", "Pirinci kaseye al.", "Somon, avokado, salatalığı diz.", "Soya sosu ve susamla."], "note": "Poke kase tarzı; 2 gün (somon önceden pişmiş)."}, {"id": 98, "name": "Hamsi Tava", "emoji": "🐟", "cat": "fish", "time": "20 dk", "serv": "3", "keeps": "1 gün", "tags": ["protein", "ucuz"], "ing": ["500 g hamsi (alici)", "1 bardak mısır unu", "zeytinyağı", "tuz", "limon (servis)"], "steps": ["Hamsileri temizle, tuzla.", "Mısır ununa bula.", "Az yağda her yüzü kızart.", "Limonla servis."], "note": "Taze ye; çıtır çıtır."}, {"id": 99, "name": "Ton Balıklı Sebzeli Güveç", "emoji": "🥘", "cat": "fish", "time": "25 dk", "serv": "4", "keeps": "3 gün", "tags": ["protein", "tek tencere"], "ing": ["2 kutu ton balığı", "1 patates, 1 biber, 1 soğan", "1 kutu doğranmış domates", "zeytinyağı", "tuz, karabiber"], "steps": ["Soğan ve biberi soteleyin.", "Patates ve domatesi ekle, 12 dk pişir.", "Ton balığını ekle, 3 dk.", "Maydanozla servis."], "note": "Konserve ton balığıyla pratik; 3 gün."}, {"id": 100, "name": "Midye Dolma tarzı Pilav (midye olmadan)", "emoji": "🍚", "cat": "fish", "time": "30 dk", "serv": "4", "keeps": "3 gün", "tags": ["aromalı", "iç pilav"], "ing": ["1.5 bardak pirinç", "1 soğan", "2 yk dolmalık fıstık (pinoli)", "1 yk kuş üzümü", "zeytinyağı", "tarçın, yenibahar, tuz"], "steps": ["Soğan ve fıstığı zeytinyağında kavur.", "Pirinç, kuş üzümü, baharatları ekle.", "2.5 bardak sıcak su koy.", "15 dk pişir, demlendir."], "note": "Aromalı iç pilav; balıkların yanına; 3 gün."}];
+
+const CATS = {
+  all:      {label:"Hepsi",          c1:"#3E7D4E", c2:"#2F6A40"},
+  pasta:    {label:"Makarna & Pilav", c1:"#F2B441", c2:"#E8862E"},
+  legume:   {label:"Bakliyat",        c1:"#E07A3E", c2:"#C24B2E"},
+  egg:      {label:"Yumurta",         c1:"#FFCF4D", c2:"#F2A93B"},
+  chicken:  {label:"Tavuk",           c1:"#E8825A", c2:"#D85436"},
+  soup:     {label:"Çorba",           c1:"#7FA86B", c2:"#4F7B3E"},
+  salad:    {label:"Salata & Kase",   c1:"#8BC34A", c2:"#4E9A4E"},
+  oven:     {label:"Fırın & Tepsi",   c1:"#D98A3D", c2:"#A85A2A"},
+  breakfast:{label:"Kahvaltı",        c1:"#F2A98F", c2:"#E07A6E"},
+  veggie:   {label:"Sebze",           c1:"#6FB04A", c2:"#3E8A3E"},
+  fish:     {label:"Deniz",           c1:"#4FB0A8", c2:"#2E7D8A"},
+};
+
+/* ---------- persistence (graceful) ---------- */
+const SKEY = "myeasymeals_saved_v1";
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(SKEY)) || []; }catch(e){ return mem; } }
+function storeSaved(a){ try{ localStorage.setItem(SKEY, JSON.stringify(a)); }catch(e){ mem = a; } }
+let mem = [];
+let saved = loadSaved();
+
+/* ---------- state ---------- */
+let filter = "all";
+let deck = [];       // remaining recipe ids in current run
+let history = [];    // [{id, action}]
+const checked = {};  // recipe id -> Set of ingredient indices
+
+const $ = s => document.querySelector(s);
+const deckEl = $("#deck"), emptyEl = $("#empty");
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function buildDeck(){
+  const pool = RECIPES.filter(r => filter==="all" || r.cat===filter);
+  deck = shuffle(pool.map(r=>r.id));
+  history = [];
+  render();
+  updateUndo();
+}
+
+function byId(id){ return RECIPES.find(r=>r.id===id); }
+
+/* ---------- card rendering ---------- */
+function render(){
+  deckEl.innerHTML = "";
+  const top3 = deck.slice(0,3).reverse(); // last in array = top card
+  top3.forEach((id, idx) => {
+    const r = byId(id);
+    const isTop = idx === top3.length-1;
+    const depth = top3.length-1-idx;
+    const cat = CATS[r.cat];
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = id;
+    card.style.transform = `translateY(${depth*10}px) scale(${1-depth*0.04})`;
+    card.style.zIndex = idx;
+    card.innerHTML = `
+      <div class="hero" style="background:linear-gradient(150deg,${cat.c1},${cat.c2})">
+        <span class="cat-tag">${cat.label}</span>
+        <span class="glyph">${r.emoji}</span>
+        <span class="keeps">🗓️ ${r.keeps} taze</span>
+        <div class="stamp like">Eşleş</div>
+        <div class="stamp nope">Geç</div>
+      </div>
+      <div class="body">
+        <h2>${r.name}</h2>
+        <div class="meta">
+          <span>⏱️ ${r.time}</span>
+          <span>🍽️ ${r.serv} kişi</span>
+          <span>📋 ${r.ing.length} malzeme</span>
+        </div>
+        <div class="taglist">${r.tags.map(t=>`<span class="t">${t}</span>`).join("")}</div>
+        <div class="hint">↔️ Kaydır ya da aşağıdaki düğmeleri kullan</div>
+      </div>`;
+    deckEl.appendChild(card);
+    if(isTop) attachDrag(card);
+  });
+  emptyEl.classList.toggle("show", deck.length===0);
+  const total = RECIPES.filter(r => filter==="all" || r.cat===filter).length;
+  $("#counter").textContent = deck.length
+    ? `${total} tarif arasından · ${deck.length} kaldı`
+    : `${total} tarifi de gördün`;
+}
+
+/* ---------- drag / swipe ---------- */
+function attachDrag(card){
+  let startX=0, startY=0, dx=0, dy=0, dragging=false;
+  const like = card.querySelector(".stamp.like");
+  const nope = card.querySelector(".stamp.nope");
+
+  const down = e=>{
+    dragging=true;
+    const p = e.touches? e.touches[0] : e;
+    startX=p.clientX; startY=p.clientY;
+    card.style.transition="none";
+  };
+  const move = e=>{
+    if(!dragging) return;
+    const p = e.touches? e.touches[0] : e;
+    dx=p.clientX-startX; dy=p.clientY-startY;
+    const rot = dx/18;
+    card.style.transform=`translate(${dx}px,${dy}px) rotate(${rot}deg)`;
+    const t = Math.min(Math.abs(dx)/120, 1);
+    like.style.opacity = dx>0 ? t : 0;
+    nope.style.opacity = dx<0 ? t : 0;
+  };
+  const up = ()=>{
+    if(!dragging) return;
+    dragging=false;
+    card.style.transition="transform .32s cubic-bezier(.22,1,.36,1)";
+    if(dx>110){ fly(card, 1); }
+    else if(dx<-110){ fly(card, -1); }
+    else { card.style.transform=""; like.style.opacity=0; nope.style.opacity=0; }
+    dx=0;dy=0;
+  };
+  card.addEventListener("mousedown",down);
+  window.addEventListener("mousemove",move);
+  window.addEventListener("mouseup",up);
+  card.addEventListener("touchstart",down,{passive:true});
+  card.addEventListener("touchmove",move,{passive:true});
+  card.addEventListener("touchend",up);
+}
+
+function fly(card, dir){
+  const id = +card.dataset.id;
+  card.style.transform=`translate(${dir*600}px,${dir>0?-60:-40}px) rotate(${dir*30}deg)`;
+  card.style.opacity="0";
+  setTimeout(()=>{
+    deck = deck.filter(x=>x!==id);
+    history.push({id, action: dir>0?"like":"pass"});
+    if(dir>0) match(id);
+    render();
+    updateUndo();
+  }, 240);
+}
+
+/* programmatic buttons */
+function topCard(){ const cards=deckEl.querySelectorAll(".card"); return cards[cards.length-1]; }
+$("#passBtn").onclick = ()=>{ const c=topCard(); if(c){ c.style.transition="transform .32s cubic-bezier(.22,1,.36,1)"; fly(c,-1);} };
+$("#likeBtn").onclick = ()=>{ const c=topCard(); if(c){ c.style.transition="transform .32s cubic-bezier(.22,1,.36,1)"; fly(c,1);} };
+
+$("#undoBtn").onclick = ()=>{
+  const last = history.pop();
+  if(!last) return;
+  deck.unshift(last.id);
+  render(); updateUndo();
+};
+function updateUndo(){ $("#undoBtn").disabled = history.length===0; }
+
+/* ---------- match -> save + open recipe (stays until closed) ---------- */
+function match(id){
+  if(!saved.includes(id)){ saved.unshift(id); storeSaved(saved); }
+  updateBadge();
+  openRecipe(id, true);
+}
+function updateBadge(){
+  const b=$("#savedBadge");
+  if(saved.length){ b.style.display="inline-flex"; b.textContent=saved.length; }
+  else b.style.display="none";
+}
+
+/* ---------- sheet ---------- */
+const scrim=$("#scrim"), sheet=$("#sheet"), sc=$("#sheetContent");
+function openSheet(){ scrim.classList.add("open"); sheet.classList.add("open"); }
+function closeSheet(){ scrim.classList.remove("open"); sheet.classList.remove("open"); }
+scrim.onclick = closeSheet;
+
+function openRecipe(id, fromMatch){
+  const r=byId(id); const cat=CATS[r.cat];
+  if(!checked[id]) checked[id]=new Set();
+  const ings = r.ing.map((it,i)=>`
+    <li class="${checked[id].has(i)?"done":""}" data-i="${i}">
+      <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span>${it}</span>
+    </li>`).join("");
+  const steps = r.steps.map(s=>`<li>${s}</li>`).join("");
+  sc.innerHTML = `
+    <div class="sheet-head">
+      <button class="x" id="xBtn" aria-label="Kapat">✕</button>
+      <span class="s-cat" style="background:linear-gradient(135deg,${cat.c1},${cat.c2})">${r.emoji} ${cat.label}</span>
+      <h2>${r.name}</h2>
+      <div class="s-meta">
+        <span>⏱️ ${r.time}</span><span>🍽️ ${r.serv} kişi</span><span>🗓️ ${r.keeps} taze kalır</span>
+      </div>
+    </div>
+    <div class="sheet-body">
+      <div class="sec-label">🛒 Malzemeler</div>
+      <ul class="ing" id="ingList">${ings}</ul>
+      <div class="sec-label">👩‍🍳 Nasıl yapılır</div>
+      <ol class="steps">${steps}</ol>
+      <div class="note">💡<div><b>Saklama:</b> ${r.note}</div></div>
+      ${fromMatch ? '<p class="stay-tag">Bu tarif sen kapatana kadar açık kalır. Listene de eklendi 💚</p>' : ''}
+    </div>`;
+  $("#xBtn").onclick = closeSheet;
+  // ingredient checklist (shopping)
+  sc.querySelectorAll("#ingList li").forEach(li=>{
+    li.onclick=()=>{
+      const i=+li.dataset.i;
+      if(checked[id].has(i)){ checked[id].delete(i); li.classList.remove("done"); }
+      else { checked[id].add(i); li.classList.add("done"); }
+    };
+  });
+  openSheet();
+}
+
+/* ---------- saved list view ---------- */
+$("#openSaved").onclick = ()=>{
+  const rows = saved.map(id=>{
+    const r=byId(id); const cat=CATS[r.cat];
+    return `<div class="srow" data-id="${id}">
+      <span class="sg">${r.emoji}</span>
+      <div class="si"><h4>${r.name}</h4><p>${cat.label} · ⏱️ ${r.time} · 🗓️ ${r.keeps}</p></div>
+      <button class="rm" data-rm="${id}" aria-label="Çıkar">✕</button>
+    </div>`;
+  }).join("");
+  sc.innerHTML = `
+    <div class="sheet-head">
+      <button class="x" id="xBtn" aria-label="Kapat">✕</button>
+      <span class="s-cat" style="background:linear-gradient(135deg,#3E7D4E,#2F6A40)">🍳 Mutfak listem</span>
+      <h2>Eşleştiğin tarifler</h2>
+      <div class="s-meta"><span>${saved.length} tarif kayıtlı</span></div>
+    </div>
+    <div class="sheet-body">
+      ${saved.length ? `<div class="saved-list">${rows}</div>`
+        : `<div class="list-empty"><div class="le-g">🥣</div>Henüz tarif eşleştirmedin.<br>Sağa kaydırdığın tarifler buraya düşer.</div>`}
+    </div>`;
+  $("#xBtn").onclick = closeSheet;
+  sc.querySelectorAll(".srow").forEach(row=>{
+    row.onclick = e=>{ if(e.target.dataset.rm!==undefined) return; openRecipe(+row.dataset.id, false); };
+  });
+  sc.querySelectorAll("[data-rm]").forEach(b=>{
+    b.onclick = e=>{
+      e.stopPropagation();
+      const id=+b.getAttribute("data-rm");
+      saved = saved.filter(x=>x!==id); storeSaved(saved); updateBadge();
+      b.closest(".srow").remove();
+    };
+  });
+  openSheet();
+};
+
+/* ---------- chips ---------- */
+function buildChips(){
+  const wrap=$("#chips"); wrap.innerHTML="";
+  Object.keys(CATS).forEach(k=>{
+    const c=document.createElement("button");
+    c.className="chip"+(k===filter?" on":"");
+    c.textContent = k==="all" ? "Hepsi" : (CATS[k].emoji||"")+CATS[k].label;
+    c.onclick=()=>{ filter=k; buildChips(); buildDeck(); };
+    wrap.appendChild(c);
+  });
+}
+
+$("#reshuffle").onclick = buildDeck;
+
+/* ---------- keyboard ---------- */
+window.addEventListener("keydown", e=>{
+  if(sheet.classList.contains("open")){ if(e.key==="Escape") closeSheet(); return; }
+  if(e.key==="ArrowRight") $("#likeBtn").click();
+  if(e.key==="ArrowLeft") $("#passBtn").click();
+});
+
+/* init */
+buildChips();
+buildDeck();
+updateBadge();
+</script>
+</body>
+</html>
